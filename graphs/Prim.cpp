@@ -11,7 +11,7 @@
 
 
 #define INF     (1<<30)
-#define V	    6
+#define V       6
 #define NC      1000 // not connected
 
 
@@ -25,12 +25,12 @@ using namespace std;
 // assign NOT CONNECTED for every (vertex, vertex)
 
 int graph[V][V] = {
-	{NC, 6, 1, 5, NC, NC},
-	{6, NC, 5, NC, 3, NC},
-	{1, 5,  NC, 5, 6,  4},
-	{5, NC, 5, NC, NC, 2},
-	{NC, 3, 6, NC, NC, 6},
-	{NC, NC, 4, 2, 6, NC},
+    {NC, 6, 1, 5, NC, NC},
+    {6, NC, 5, NC, 3, NC},
+    {1, 5,  NC, 5, 6,  4},
+    {5, NC, 5, NC, NC, 2},
+    {NC, 3, 6, NC, NC, 6},
+    {NC, NC, 4, 2, 6, NC},
 };
 
 int  cost[V]; // weight
@@ -38,13 +38,13 @@ int  edge[V]; // closest edge
 bool mark[V]; // if marked
 
 void prim(int n = 0) {
-	for (int i = 0; i < V; i++) {
+    for (int i = 0; i < V; i++) {
         cost[i] = graph[0][i];
         edge[i] = 0;
         mark[i] = false;
-	}
-	mark[0] = true;
-	for (int i = 0; i < V; i++) {
+    }
+    mark[0] = true;
+    for (int i = 0; i < V; i++) {
         int mini_cost = INF;
         int next_edge = -1;
         for (int j = 0; j < V; j++) {
@@ -67,7 +67,7 @@ void prim(int n = 0) {
                 edge[k] = next_edge; // miniest weight from next_edge to k
             }
         }
-	}
+    }
 }
 
 
