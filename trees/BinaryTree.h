@@ -1,213 +1,119 @@
-// Binary Tree
-
-#include <iostream>
-#include <cstdlib>
-#include <stack>
-#include <queue>
-using namespace std;
-
-template <class T>
-class tree_iterator;
-
-template <class T>
-struct node {
-private:
-	typedef node<T> __self;
-public:
-	T data;
-	node *left;
-	node *right;
+struct TreeNode {
+    int val;
+    TreeNode *left;
+    TreeNode *right;
+    TreeNode() { }
+    TreeNode(int value):
+        val(value),
+        left(nullptr),
+        right(nullptr) { }
 };
 
-template <class T>
-class bin_tree {
+class BinaryTree {
 private:
-	typedef node<T> _node;
-	_node *root;
+    TreeNode *root;
 public:
-	typedef tree_iterator<T> iterator;
-public:
-	bin_tree() {
-		root = (_node *)NULL;
-	}
 
-	~bin_tree() {
-		clear();
-	}
+    BinaryTree(): root(nullptr) { }
+    TreeNode *tree_root() const {
+        return root;
+    }
 
-	iterator tree_root() {
-		return tree_iterator<T>(root);
-	}
+    void insert(int value) {
+        TreeNode *curr = root, *parent = nullptr;
+        if (curr == nullptr) {
+            root = new TreeNode(value);
+            return;
+        }
+        while (curr) {
+            if (curr->val == value)
+                return;
+            else if (curr->val < value) {
+                parent = curr;
+                curr = curr->right;
+            }
+            else {
+                parent = curr;
+                curr = curr->left;
+            }
+        }
+        if (parent) {
+            if (parent->val > value)
+                parent->left = new TreeNode(value);
+            else
+                parent->right = new TreeNode(value);
+        }
+    }
 
-	void insert(T _data) {
-		if (root)
-			insert(root, _data);
-		else {
-			root = new _node;
-			root->data = _data;
-			root->left = NULL;
-			root->right = NULL;
-		}
-	}
+    void erase(int value) {
+        TreeNode *curr = root, *parent = nullptr;
+        int position = 0;
+        while (curr && curr->val != value) {
+            parent = curr;
+            if (curr->val > value) {
+                curr = curr->right;
+                position = 1;
+            }
+            else {
+                curr = curr->left;
+                position = 2;
+            }
+        }
+        if (!curr) return;
+        if (curr->left && curr->right) {
+            // has two children, get most left child of right subtree
+            TreeNode *rtree = curr->right,
+                     *prev = nullptr;
+            while (rtree->left) {
+                prev = rtree;
+                rtree = rtree->left;
+            }
+            if (prev) prev->left = nullptr;
+            rtree->left = curr->left;
+            rtree->right = curr->right;
 
-	_node *find(T _key) {
-		return find(root, _key);
-	}
-
-	int count() const {
-		int __cnt = 0;
-		queue<_node *> trav_q;
-		_node *tmp = root;
-		while (tmp) {
-			++__cnt;
-			if (tmp->left)
-				trav_q.push(tmp->left);
-			if (tmp->right)
-				trav_q.push(tmp->right);
-			if (trav_q.empty())
-				return __cnt;
-			tmp = trav_q.front();
-			trav_q.pop();
-		}
-		return __cnt;
-	}
-
-private:
-
-	void clear() {
-		clear(root);
-	}
-
-	void clear(_node *_leaf) {
-		if (_leaf) {
-			clear(_leaf->left);
-			clear(_leaf->right);
-			delete _leaf;
-		}
-	}
-
-	void insert(_node *_leaf, T _data) {
-		if (_data < _leaf->data) {
-			if (_leaf->left != NULL)
-				insert(_leaf->left, _data);
-			else {
-				_leaf->left = new _node;
-				_leaf->left->data = _data;
-				_leaf->left->left = NULL;
-				_leaf->left->right = NULL;
-			}
-		}
-		else if (_data >= _leaf->data) {
-			if (_leaf->right != NULL)
-				insert(_leaf->right, _data);
-			else {
-				_leaf->right = new _node;
-				_leaf->right->data = _data;
-				_leaf->right->left = NULL;
-				_leaf->right->right = NULL;
-			}
-		}
-	}
-
-	_node *find(_node *_leaf, T _key) {
-		if (!_leaf)
-			return NULL;
-		else {
-			if (_key == _leaf->data)
-				return _leaf;
-			else if (_key < _leaf->data)
-				return find(_leaf->left, _key);
-			else
-				return find(_leaf->right, _key);
-		}
-	}
+            if (position == 0) {
+                root = rtree;
+            }
+            else if (position == 1) {
+                parent->left = rtree;
+            }
+            else if (position == 2) {
+                parent->right = rtree;
+            }
+            curr->left = curr->right = nullptr;
+        }
+        else if (curr->left || curr->right) {
+            TreeNode *child;
+            if (curr->left) {
+                child = curr->left;
+                curr->left = nullptr;
+            }
+            else {
+                child = curr->right;
+                curr->right = nullptr;
+            }
+            if (position == 0) {
+                root = child;
+            }
+            else if (position == 1) {
+                parent->left = child;
+            }
+            else {
+                parent->right = child;
+            }
+        }
+        else {
+            if (position == 0) {
+                root = nullptr;
+            }
+            if (position == 1) {
+                parent->left = nullptr;
+            }
+            else {
+                parent->right = nullptr;
+            }
+            curr->left = curr->right = nullptr;
+        }
+    }
 };
-
-template <class T>
-class tree_iterator {
-private:
-	typedef tree_iterator<T> __self;
-	typedef node<T> _node;
-	stack<_node *> iter_stack;
-	queue<_node *> iter_queue;
-	_node *_cur;
-public:
-	tree_iterator(_node *_position) :_cur(_position) {}
-
-	~tree_iterator() {}
-
-	void level_order_traversal() {
-		level_order_traversal(_cur);
-	}
-
-	void in_order_traversal() {
-		in_order_traversal(_cur);
-	}
-
-	T& operator*() {
-		return ((_node *)_cur)->data;
-	}
-
-	bool operator!=(_node *_pointer) const {
-		return _cur != _pointer;
-	}
-
-	__self operator++(int) {
-		while (_cur) {
-			iter_stack.push(_cur);
-			_cur = _cur->left;
-		}
-		if (!iter_stack.empty()) {
-			_cur = iter_stack.top();
-			iter_stack.pop();
-			
-			__self temp = *this;
-			_cur = _cur->right;
-			return temp;			
-		}
-		return __self(NULL);
-	}
-
-	__self& operator++() {
-		while (_cur) {
-			iter_stack.push(_cur);
-			_cur = _cur->left;
-		}
-		if (iter_stack.empty()) {
-			*this = __self(NULL);
-			return *this;
-		}
-
-		_cur = iter_stack.top();
-		iter_stack.pop();
-
-		return *this;
-	}
-
-private:
-
-	void in_order_traversal(_node *_current) {
-		if (_current == NULL)
-			return;
-		in_order_traversal(_current->left);
-		cout << _current->data << endl;
-		in_order_traversal(_current->right);
-	}
-
-	void level_order_traversal(_node *level) {
-		while (level) {
-			if (level->left)
-				iter_queue.push(level->left);
-			if (level->right)
-				iter_queue.push(level->right);
-			if (iter_queue.empty()) {
-				cout << level->data << endl;
-				break;
-			}
-			cout << level->data << endl;
-			level = iter_queue.front();
-			iter_queue.pop();
-		}
-	}
-};
-
